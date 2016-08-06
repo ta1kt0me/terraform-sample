@@ -136,7 +136,7 @@ resource "aws_security_group" "nat" {
 }
 
 resource "aws_instance" "jump_host" {
-		ami = "ami-374db956"
+		ami = "ami-2443b745"
 		instance_type = "t2.micro"
 		key_name = "sample"
 		vpc_security_group_ids = [
@@ -145,6 +145,7 @@ resource "aws_instance" "jump_host" {
 		]
 		subnet_id = "${aws_subnet.public-a.id}"
 		associate_public_ip_address = "true"
+		source_dest_check = "false"
 		root_block_device = {
 				volume_type = "gp2"
 				volume_size = "8"
