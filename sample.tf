@@ -164,7 +164,7 @@ resource "aws_instance" "nat_host" {
 		instance_type = "t2.micro"
 		key_name = "${var.keypair}"
 		vpc_security_group_ids = [
-				"${aws_security_group.nat.id}",
+				"${aws_security_group.nat.id}"
 		]
 		subnet_id = "${aws_subnet.public-a.id}"
 		associate_public_ip_address = "true"
@@ -175,7 +175,7 @@ resource "aws_instance" "nat_host" {
 		}
 		depends_on = [
 				"aws_subnet.public-a",
-				"aws_security_group.nat",
+				"aws_security_group.nat"
 		]
 		tags {
 				Name = "${var.tag}"
@@ -187,7 +187,7 @@ resource "aws_instance" "app_host" {
 		instance_type = "t2.micro"
 		key_name = "${var.keypair}"
 		vpc_security_group_ids = [
-				"${aws_security_group.app.id}",
+				"${aws_security_group.app.id}"
 		]
 		subnet_id = "${aws_subnet.private-a.id}"
 		associate_public_ip_address = "false"
@@ -197,7 +197,7 @@ resource "aws_instance" "app_host" {
 		}
 		depends_on = [
 				"aws_subnet.private-a",
-				"aws_security_group.app",
+				"aws_security_group.app"
 		]
 		tags {
 				Name = "${var.tag}"
