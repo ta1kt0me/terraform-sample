@@ -1,3 +1,7 @@
+variable "keypair" {
+		default = "sample"
+}
+
 variable "tag" {
 		default = "sample"
 }
@@ -158,7 +162,7 @@ resource "aws_security_group" "app" {
 resource "aws_instance" "nat_host" {
 		ami = "ami-2443b745"
 		instance_type = "t2.micro"
-		key_name = "sample"
+		key_name = "${var.keypair}"
 		vpc_security_group_ids = [
 				"${aws_security_group.nat.id}",
 		]
@@ -181,7 +185,7 @@ resource "aws_instance" "nat_host" {
 resource "aws_instance" "app_host" {
 		ami = "ami-a21529cc"
 		instance_type = "t2.micro"
-		key_name = "sample"
+		key_name = "${var.keypair}"
 		vpc_security_group_ids = [
 				"${aws_security_group.app.id}",
 		]
