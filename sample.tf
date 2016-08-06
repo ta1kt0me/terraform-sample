@@ -33,6 +33,16 @@ resource "aws_subnet" "public-a" {
 		}
 }
 
+resource "aws_subnet" "private-a" {
+		vpc_id = "${aws_vpc.sampleVPC.id}"
+		cidr_block = "10.1.2.0/24"
+		availability_zone = "ap-northeast-1a"
+		depends_on = ["aws_vpc.sampleVPC"]
+		tags {
+				Name = "${var.tag}"
+		}
+}
+
 resource "aws_route_table" "public_route" {
 		vpc_id = "${aws_vpc.sampleVPC.id}"
 		route {
