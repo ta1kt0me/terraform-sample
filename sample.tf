@@ -44,3 +44,9 @@ resource "aws_route_table" "public_route" {
 				Name = "${var.tag}"
 		}
 }
+
+resource "aws_route_table_association" "public-a" {
+		subnet_id = "${aws_subnet.public-a.id}"
+		route_table_id = "${aws_route_table.public_route.id}"
+		depends_on = ["aws_subnet.public-a", "aws_route_table.public_route"]
+}
