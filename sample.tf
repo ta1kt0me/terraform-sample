@@ -67,9 +67,9 @@ resource "aws_route_table" "nat_route" {
 		vpc_id = "${aws_vpc.sampleVPC.id}"
 		route {
 				cidr_block = "0.0.0.0/0"
-				instance_id = "${aws_instance.jump_host.id}"
+				instance_id = "${aws_instance.nat_host.id}"
 		}
-		depends_on = ["aws_vpc.sampleVPC", "aws_instance.jump_host"]
+		depends_on = ["aws_vpc.sampleVPC", "aws_instance.nat_host"]
 		tags {
 				Name = "${var.tag}"
 		}
@@ -87,8 +87,8 @@ resource "aws_route_table_association" "private-a" {
 		depends_on = ["aws_subnet.public-a", "aws_route_table.nat_route"]
 }
 
-resource "aws_security_group" "jump" {
-		name = "jump"
+resource "aws_security_group" "nat" {
+		name = "nat"
 		description = "allow ssh inbound traffic"
 		vpc_id = "${aws_vpc.sampleVPC.id}"
 		ingress {
@@ -143,12 +143,12 @@ resource "aws_security_group" "nat" {
 		}
 }
 
-resource "aws_instance" "jump_host" {
+resource "aws_instance" "nat_host" {
 		ami = "ami-2443b745"
 		instance_type = "t2.micro"
 		key_name = "sample"
 		vpc_security_group_ids = [
-				"${aws_security_group.jump.id}",
+				"${aws_security_group.nat.id}",
 				"${aws_security_group.nat.id}"
 		]
 		subnet_id = "${aws_subnet.public-a.id}"
@@ -160,7 +160,7 @@ resource "aws_instance" "jump_host" {
 		}
 		depends_on = [
 				"aws_subnet.public-a",
-				"aws_security_group.jump",
+				"aws_security_group.nat",
 				"aws_security_group.nat"
 		]
 		tags {
@@ -173,7 +173,7 @@ resource "aws_instance" "app_host" {
 		instance_type = "t2.micro"
 		key_name = "sample"
 		vpc_security_group_ids = [
-				"${aws_security_group.jump.id}",
+				"${aws_security_group.nat.id}",
 				"${aws_security_group.nat.id}"
 		]
 		subnet_id = "${aws_subnet.private-a.id}"
@@ -184,7 +184,7 @@ resource "aws_instance" "app_host" {
 		}
 		depends_on = [
 				"aws_subnet.private-a",
-				"aws_security_group.jump",
+				"aws_security_group.nat",
 				"aws_security_group.nat"
 		]
 		tags {
