@@ -72,3 +72,22 @@ resource "aws_security_group" "jump" {
 				Name = "${var.tag}"
 		}
 }
+
+resource "aws_instance" "jump_host" {
+		ami = "ami-374db956"
+		instance_type = "t2.micro"
+		key_name = "sample"
+		vpc_security_group_ids = [
+				"${aws_security_group.jump.id}"
+		]
+		subnet_id = "${aws_subnet.public-a.id}"
+		associate_public_ip_address = "true"
+		root_block_device = {
+				volume_type = "gp2"
+				volume_size = "8"
+		}
+		depends_on = ["aws_subnet.public-a", "aws_security_group.jump"]
+		tags {
+				Name = "${var.tag}"
+		}
+}
