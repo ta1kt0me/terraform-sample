@@ -121,6 +121,40 @@ resource "aws_security_group" "nat" {
 		}
 }
 
+resource "aws_security_group" "app" {
+		name = "app"
+		description = "allow private traffic"
+		vpc_id = "${aws_vpc.sampleVPC.id}"
+		ingress {
+				from_port = 22
+				to_port = 22
+				protocol = "tcp"
+				cidr_blocks = ["${var.cidr.public}"]
+		}
+		ingress {
+				from_port = 80
+				to_port = 80
+				protocol = "tcp"
+				cidr_blocks = ["${var.cidr.public}"]
+		}
+		ingress {
+				from_port = 443
+				to_port = 443
+				protocol = "tcp"
+				cidr_blocks = ["${var.cidr.public}"]
+		}
+		egress {
+				from_port = 0
+				to_port = 0
+				protocol = "-1"
+				cidr_blocks = ["0.0.0.0/0"]
+		}
+		depends_on = ["aws_vpc.sampleVPC"]
+		tags {
+				Name = "${var.tag}"
+		}
+}
+
 resource "aws_instance" "nat_host" {
 		ami = "ami-2443b745"
 		instance_type = "t2.micro"
@@ -149,7 +183,7 @@ resource "aws_instance" "app_host" {
 		instance_type = "t2.micro"
 		key_name = "sample"
 		vpc_security_group_ids = [
-				"${aws_security_group.nat.id}",
+				"${aws_security_group.app.id}",
 		]
 		subnet_id = "${aws_subnet.private-a.id}"
 		associate_public_ip_address = "false"
@@ -159,7 +193,7 @@ resource "aws_instance" "app_host" {
 		}
 		depends_on = [
 				"aws_subnet.private-a",
-				"aws_security_group.nat",
+				"aws_security_group.app",
 		]
 		tags {
 				Name = "${var.tag}"
