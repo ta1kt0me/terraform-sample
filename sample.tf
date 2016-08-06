@@ -22,3 +22,13 @@ resource "aws_internet_gateway" "sampleIGW" {
 				Name = "${var.tag}"
 		}
 }
+
+resource "aws_subnet" "public-a" {
+		vpc_id = "${aws_vpc.sampleVPC.id}"
+		cidr_block = "10.1.1.0/24"
+		availability_zone = "ap-northeast-1a"
+		depends_on = ["aws_vpc.sampleVPC"]
+		tags {
+				Name = "${var.tag}"
+		}
+}
