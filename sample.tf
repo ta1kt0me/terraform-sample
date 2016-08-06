@@ -55,10 +55,28 @@ resource "aws_route_table" "public_route" {
 		}
 }
 
+resource "aws_route_table" "nat_route" {
+		vpc_id = "${aws_vpc.sampleVPC.id}"
+		route {
+				cidr_block = "0.0.0.0/0"
+				instance_id = "${aws_instance.jump_host.id}"
+		}
+		depends_on = ["aws_vpc.sampleVPC", "aws_instance.jump_host"]
+		tags {
+				Name = "${var.tag}"
+		}
+}
+
 resource "aws_route_table_association" "public-a" {
 		subnet_id = "${aws_subnet.public-a.id}"
 		route_table_id = "${aws_route_table.public_route.id}"
 		depends_on = ["aws_subnet.public-a", "aws_route_table.public_route"]
+}
+
+resource "aws_route_table_association" "private-a" {
+		subnet_id = "${aws_subnet.private-a.id}"
+		route_table_id = "${aws_route_table.nat_route.id}"
+		depends_on = ["aws_subnet.public-a", "aws_route_table.nat_route"]
 }
 
 resource "aws_security_group" "jump" {
