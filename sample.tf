@@ -32,3 +32,15 @@ resource "aws_subnet" "public-a" {
 				Name = "${var.tag}"
 		}
 }
+
+resource "aws_route_table" "public_route" {
+		vpc_id = "${aws_vpc.sampleVPC.id}"
+		route {
+				cidr_block = "0.0.0.0/0"
+				gateway_id = "${aws_internet_gateway.sampleIGW.id}"
+		}
+		depends_on = ["aws_vpc.sampleVPC", "aws_internet_gateway.sampleIGW"]
+		tags {
+				Name = "${var.tag}"
+		}
+}
