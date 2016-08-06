@@ -89,7 +89,7 @@ resource "aws_route_table_association" "private-a" {
 
 resource "aws_security_group" "nat" {
 		name = "nat"
-		description = "allow ssh inbound traffic"
+		description = "allow public & private traffic"
 		vpc_id = "${aws_vpc.sampleVPC.id}"
 		ingress {
 				from_port = 22
@@ -97,44 +97,22 @@ resource "aws_security_group" "nat" {
 				protocol = "tcp"
 				cidr_blocks = ["0.0.0.0/0"]
 		}
+		ingress {
+				from_port = 80
+				to_port = 80
+				protocol = "tcp"
+				cidr_blocks = ["${var.cidr.private}"]
+		}
+		ingress {
+				from_port = 443
+				to_port = 443
+				protocol = "tcp"
+				cidr_blocks = ["${var.cidr.private}"]
+		}
 		egress {
 				from_port = 0
 				to_port = 0
 				protocol = "-1"
-				cidr_blocks = ["0.0.0.0/0"]
-		}
-		depends_on = ["aws_vpc.sampleVPC"]
-		tags {
-				Name = "${var.tag}"
-		}
-}
-
-resource "aws_security_group" "nat" {
-		name = "nat"
-		description = "allow http/https traffic"
-		vpc_id = "${aws_vpc.sampleVPC.id}"
-		ingress {
-				from_port = 80
-				to_port = 80
-				protocol = "tcp"
-				cidr_blocks = ["${var.cidr.private}"]
-		}
-		ingress {
-				from_port = 443
-				to_port = 443
-				protocol = "tcp"
-				cidr_blocks = ["${var.cidr.private}"]
-		}
-		egress {
-				from_port = 80
-				to_port = 80
-				protocol = "TCP"
-				cidr_blocks = ["0.0.0.0/0"]
-		}
-		egress {
-				from_port = 443
-				to_port = 443
-				protocol = "TCP"
 				cidr_blocks = ["0.0.0.0/0"]
 		}
 		depends_on = ["aws_vpc.sampleVPC"]
@@ -149,7 +127,6 @@ resource "aws_instance" "nat_host" {
 		key_name = "sample"
 		vpc_security_group_ids = [
 				"${aws_security_group.nat.id}",
-				"${aws_security_group.nat.id}"
 		]
 		subnet_id = "${aws_subnet.public-a.id}"
 		associate_public_ip_address = "true"
@@ -161,7 +138,6 @@ resource "aws_instance" "nat_host" {
 		depends_on = [
 				"aws_subnet.public-a",
 				"aws_security_group.nat",
-				"aws_security_group.nat"
 		]
 		tags {
 				Name = "${var.tag}"
@@ -174,7 +150,6 @@ resource "aws_instance" "app_host" {
 		key_name = "sample"
 		vpc_security_group_ids = [
 				"${aws_security_group.nat.id}",
-				"${aws_security_group.nat.id}"
 		]
 		subnet_id = "${aws_subnet.private-a.id}"
 		associate_public_ip_address = "false"
@@ -185,7 +160,6 @@ resource "aws_instance" "app_host" {
 		depends_on = [
 				"aws_subnet.private-a",
 				"aws_security_group.nat",
-				"aws_security_group.nat"
 		]
 		tags {
 				Name = "${var.tag}"
