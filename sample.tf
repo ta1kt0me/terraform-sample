@@ -1,6 +1,14 @@
 variable "tag" {
 		default = "sample"
 }
+
+variable "cidr" {
+		default = {
+				public = "10.1.1.0/24"
+				private = "10.1.2.0/24"
+		}
+}
+
 provider "aws" {
 		region = "ap-northeast-1"
 }
@@ -25,7 +33,7 @@ resource "aws_internet_gateway" "sampleIGW" {
 
 resource "aws_subnet" "public-a" {
 		vpc_id = "${aws_vpc.sampleVPC.id}"
-		cidr_block = "10.1.1.0/24"
+		cidr_block = "${var.cidr.public}"
 		availability_zone = "ap-northeast-1a"
 		depends_on = ["aws_vpc.sampleVPC"]
 		tags {
@@ -35,7 +43,7 @@ resource "aws_subnet" "public-a" {
 
 resource "aws_subnet" "private-a" {
 		vpc_id = "${aws_vpc.sampleVPC.id}"
-		cidr_block = "10.1.2.0/24"
+		cidr_block = "${var.cidr.private}"
 		availability_zone = "ap-northeast-1a"
 		depends_on = ["aws_vpc.sampleVPC"]
 		tags {
@@ -109,13 +117,13 @@ resource "aws_security_group" "nat" {
 				from_port = 80
 				to_port = 80
 				protocol = "tcp"
-				cidr_blocks = ["10.1.2.0/24"]
+				cidr_blocks = ["${var.cidr.private}"]
 		}
 		ingress {
 				from_port = 443
 				to_port = 443
 				protocol = "tcp"
-				cidr_blocks = ["10.1.2.0/24"]
+				cidr_blocks = ["${var.cidr.private}"]
 		}
 		egress {
 				from_port = 80
