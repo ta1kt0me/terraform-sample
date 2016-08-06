@@ -101,12 +101,47 @@ resource "aws_security_group" "jump" {
 		}
 }
 
+resource "aws_security_group" "nat" {
+		name = "nat"
+		description = "allow http/https traffic"
+		vpc_id = "${aws_vpc.sampleVPC.id}"
+		ingress {
+				from_port = 80
+				to_port = 80
+				protocol = "tcp"
+				cidr_blocks = ["10.1.2.0/24"]
+		}
+		ingress {
+				from_port = 443
+				to_port = 443
+				protocol = "tcp"
+				cidr_blocks = ["10.1.2.0/24"]
+		}
+		egress {
+				from_port = 80
+				to_port = 80
+				protocol = "TCP"
+				cidr_blocks = ["0.0.0.0/0"]
+		}
+		egress {
+				from_port = 443
+				to_port = 443
+				protocol = "TCP"
+				cidr_blocks = ["0.0.0.0/0"]
+		}
+		depends_on = ["aws_vpc.sampleVPC"]
+		tags {
+				Name = "${var.tag}"
+		}
+}
+
 resource "aws_instance" "jump_host" {
 		ami = "ami-374db956"
 		instance_type = "t2.micro"
 		key_name = "sample"
 		vpc_security_group_ids = [
-				"${aws_security_group.jump.id}"
+				"${aws_security_group.jump.id}",
+				"${aws_security_group.nat.id}"
 		]
 		subnet_id = "${aws_subnet.public-a.id}"
 		associate_public_ip_address = "true"
@@ -114,7 +149,35 @@ resource "aws_instance" "jump_host" {
 				volume_type = "gp2"
 				volume_size = "8"
 		}
-		depends_on = ["aws_subnet.public-a", "aws_security_group.jump"]
+		depends_on = [
+				"aws_subnet.public-a",
+				"aws_security_group.jump",
+				"aws_security_group.nat"
+		]
+		tags {
+				Name = "${var.tag}"
+		}
+}
+
+resource "aws_instance" "app_host" {
+		ami = "ami-a21529cc"
+		instance_type = "t2.micro"
+		key_name = "sample"
+		vpc_security_group_ids = [
+				"${aws_security_group.jump.id}",
+				"${aws_security_group.nat.id}"
+		]
+		subnet_id = "${aws_subnet.private-a.id}"
+		associate_public_ip_address = "false"
+		root_block_device = {
+				volume_type = "gp2"
+				volume_size = "8"
+		}
+		depends_on = [
+				"aws_subnet.private-a",
+				"aws_security_group.jump",
+				"aws_security_group.nat"
+		]
 		tags {
 				Name = "${var.tag}"
 		}
