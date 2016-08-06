@@ -50,3 +50,25 @@ resource "aws_route_table_association" "public-a" {
 		route_table_id = "${aws_route_table.public_route.id}"
 		depends_on = ["aws_subnet.public-a", "aws_route_table.public_route"]
 }
+
+resource "aws_security_group" "jump" {
+		name = "jump"
+		description = "allow ssh inbound traffic"
+		vpc_id = "${aws_vpc.sampleVPC.id}"
+		ingress {
+				from_port = 22
+				to_port = 22
+				protocol = "tcp"
+				cidr_blocks = ["0.0.0.0/0"]
+		}
+		egress {
+				from_port = 0
+				to_port = 0
+				protocol = "-1"
+				cidr_blocks = ["0.0.0.0/0"]
+		}
+		depends_on = ["aws_vpc.sampleVPC"]
+		tags {
+				Name = "${var.tag}"
+		}
+}
