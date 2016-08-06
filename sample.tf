@@ -203,3 +203,15 @@ resource "aws_instance" "app_host" {
 				Name = "${var.tag}"
 		}
 }
+
+resource "aws_eip" "nat" {
+		instance = "${aws_instance.nat_host.id}"
+		vpc = true
+}
+
+output "eip" {
+		value = "${aws_eip.nat.public_ip}"
+}
+output "app private id" {
+		value = "${aws_instance.app_host.private_ip}"
+}
