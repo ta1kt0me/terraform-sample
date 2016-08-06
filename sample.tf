@@ -14,3 +14,11 @@ resource "aws_vpc" "sampleVPC" {
 				Name = "${var.tag}"
 		}
 }
+
+resource "aws_internet_gateway" "sampleIGW" {
+		vpc_id = "${aws_vpc.sampleVPC.id}"
+		depends_on = ["aws_vpc.sampleVPC"]
+		tags {
+				Name = "${var.tag}"
+		}
+}
