@@ -328,6 +328,11 @@ resource "aws_elb" "web" {
 output "eip" {
 		value = "${aws_eip.nat.public_ip}"
 }
+
 output "web private id" {
 		value = "${aws_instance.web_host.private_ip}"
+}
+
+output "ELB dns name" {
+		value = "${aws_elb.web.dns_name}"
 }
