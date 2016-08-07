@@ -1,2 +1,3 @@
 .envrc
 ansible/ssh_config
+**/*.tfstate*
