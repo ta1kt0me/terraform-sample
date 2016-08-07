@@ -1,0 +1,18 @@
+Host bastion
+  HostName PUBLIC_IP
+  User ec2-user
+  Port 22
+  StrictHostKeyChecking no
+  PasswordAuthentication no
+  TCPKeepAlive yes
+  ForwardAgent yes
+
+Host sample_web
+  HostName WEB_PRIVATE_IP
+  User ubuntu
+  Port 22
+  StrictHostKeyChecking no
+  PasswordAuthentication no
+  TCPKeepAlive yes
+  ForwardAgent yes
+  ProxyCommand ssh -W %h:%p bastion -F ssh_config

@@ -325,6 +325,16 @@ resource "aws_elb" "web" {
 		]
 }
 
+resource "null_resource" "create-sshconfig" {
+		provisioner "local-exec" {
+				command = "sed 's/PUBLIC_IP/${aws_eip.nat.public_ip}/;s/WEB_PRIVATE_IP/${aws_instance.web_host.private_ip}/' files/templates/ssh_config > ../ansible/ssh_config"
+		}
+		depends_on = [
+				"aws_eip.nat",
+				"aws_instance.web_host"
+		]
+}
+
 output "eip" {
 		value = "${aws_eip.nat.public_ip}"
 }
