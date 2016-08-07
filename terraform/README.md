@@ -6,6 +6,16 @@ Build aws network via terraform.
 
 - Create IAM user
 - Create `sample` keypair
+- Install direnv
+  - add .envrc
+  - Write `AWS_ACCESS_KEY_ID` & `AWS_SECRET_ACCESS_KEY`
+
+### `.envrc` sample
+
+```
+AWS_ACCESS_KEY_ID=XXX
+AWS_SECRET_ACCESS_KEY=XXX
+```
 
 ## Run
 
