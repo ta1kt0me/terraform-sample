@@ -91,6 +91,35 @@ resource "aws_route_table_association" "private-a" {
 		depends_on = ["aws_subnet.public-a", "aws_route_table.nat_route"]
 }
 
+resource "aws_security_group" "elb" {
+		name = "elb"
+		description = "allow elb traffic"
+		vpc_id = "${aws_vpc.sampleVPC.id}"
+		ingress {
+				from_port = 80
+				to_port = 80
+				protocol = "tcp"
+				cidr_blocks = ["0.0.0.0/0"]
+		}
+		depends_on = ["aws_vpc.sampleVPC"]
+		tags {
+				Name = "${var.tag}"
+		}
+}
+
+resource "aws_security_group_rule" "elb_express" {
+		security_group_id = "${aws_security_group.elb.id}"
+		type = "egress"
+		from_port = 80
+		to_port = 80
+		protocol = "tcp"
+		source_security_group_id = "${aws_security_group.app.id}"
+		depends_on = [
+				"aws_security_group.elb",
+				"aws_security_group.app"
+		]
+}
+
 resource "aws_security_group" "nat" {
 		name = "nat"
 		description = "allow public & private traffic"
@@ -140,6 +169,12 @@ resource "aws_security_group" "app" {
 				to_port = 80
 				protocol = "tcp"
 				cidr_blocks = ["${var.cidr.public}"]
+		}
+		ingress {
+				from_port = 80
+				to_port = 80
+				protocol = "tcp"
+				security_groups = ["${aws_security_group.elb.id}"]
 		}
 		ingress {
 				from_port = 443
@@ -266,6 +301,27 @@ resource "aws_iam_instance_profile" "app_profile" {
 		]
 		depends_on = [
 				"aws_iam_role.cloudwatch_logs"
+		]
+}
+
+resource "aws_elb" "web" {
+		name = "web"
+		subnets = ["${aws_subnet.public-a.id}"]
+		listener {
+				instance_port = 80
+				instance_protocol = "http"
+				lb_port = 80
+				lb_protocol = "http"
+		}
+		security_groups = ["${aws_security_group.elb.id}"]
+		instances = ["${aws_instance.app_host.id}"]
+		tags {
+				Name = "${var.tag}"
+		}
+		depends_on = [
+				"aws_subnet.public-a",
+				"aws_instance.app_host",
+				"aws_security_group_rule.elb_express"
 		]
 }
 
