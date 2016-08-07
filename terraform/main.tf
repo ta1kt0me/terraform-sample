@@ -113,10 +113,10 @@ resource "aws_security_group_rule" "elb_express" {
 		from_port = 80
 		to_port = 80
 		protocol = "tcp"
-		source_security_group_id = "${aws_security_group.app.id}"
+		source_security_group_id = "${aws_security_group.web.id}"
 		depends_on = [
 				"aws_security_group.elb",
-				"aws_security_group.app"
+				"aws_security_group.web"
 		]
 }
 
@@ -154,8 +154,8 @@ resource "aws_security_group" "nat" {
 		}
 }
 
-resource "aws_security_group" "app" {
-		name = "app"
+resource "aws_security_group" "web" {
+		name = "web"
 		description = "allow private traffic"
 		vpc_id = "${aws_vpc.sampleVPC.id}"
 		ingress {
@@ -217,12 +217,12 @@ resource "aws_instance" "nat_host" {
 		}
 }
 
-resource "aws_instance" "app_host" {
+resource "aws_instance" "web_host" {
 		ami = "ami-a21529cc"
 		instance_type = "t2.micro"
 		key_name = "${var.keypair}"
 		vpc_security_group_ids = [
-				"${aws_security_group.app.id}"
+				"${aws_security_group.web.id}"
 		]
 		subnet_id = "${aws_subnet.private-a.id}"
 		associate_public_ip_address = "false"
@@ -230,11 +230,11 @@ resource "aws_instance" "app_host" {
 				volume_type = "gp2"
 				volume_size = "8"
 		}
-		iam_instance_profile = "${aws_iam_instance_profile.app_profile.name}"
+		iam_instance_profile = "${aws_iam_instance_profile.web_profile.name}"
 		depends_on = [
 				"aws_subnet.private-a",
-				"aws_security_group.app",
-				"aws_iam_instance_profile.app_profile"
+				"aws_security_group.web",
+				"aws_iam_instance_profile.web_profile"
 		]
 		tags {
 				Name = "${var.tag}"
@@ -294,8 +294,8 @@ resource "aws_iam_role_policy" "cloudwatch_logs" {
 EOF
 }
 
-resource "aws_iam_instance_profile" "app_profile" {
-		name = "app_profile"
+resource "aws_iam_instance_profile" "web_profile" {
+		name = "web_profile"
 		roles = [
 				"${aws_iam_role.cloudwatch_logs.name}"
 		]
@@ -314,13 +314,13 @@ resource "aws_elb" "web" {
 				lb_protocol = "http"
 		}
 		security_groups = ["${aws_security_group.elb.id}"]
-		instances = ["${aws_instance.app_host.id}"]
+		instances = ["${aws_instance.web_host.id}"]
 		tags {
 				Name = "${var.tag}"
 		}
 		depends_on = [
 				"aws_subnet.public-a",
-				"aws_instance.app_host",
+				"aws_instance.web_host",
 				"aws_security_group_rule.elb_express"
 		]
 }
@@ -328,6 +328,6 @@ resource "aws_elb" "web" {
 output "eip" {
 		value = "${aws_eip.nat.public_ip}"
 }
-output "app private id" {
-		value = "${aws_instance.app_host.private_ip}"
+output "web private id" {
+		value = "${aws_instance.web_host.private_ip}"
 }
