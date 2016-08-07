@@ -1,6 +1,6 @@
-# Build aws
+# Build aws vpc
 
-Build aws network via terraform.
+Build aws vpc with terraform.
 
 ## Prepare
 

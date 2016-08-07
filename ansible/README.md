@@ -1,6 +1,6 @@
-# Ansible
+# Setup web server
 
-build web server.
+Setup web server with ansible
 
 ## Prepare
 

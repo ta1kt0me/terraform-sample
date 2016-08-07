@@ -1,3 +1,3 @@
 # Terraform Sample
 
-Build aws vpc via terraform and setup web server via ansible.
+Build aws vpc with terraform and setup web server with ansible.
