@@ -300,7 +300,7 @@ resource "aws_iam_instance_profile" "web_profile" {
 				"${aws_iam_role.cloudwatch_logs.name}"
 		]
 		depends_on = [
-				"aws_iam_role.cloudwatch_logs"
+				"aws_iam_role_policy.cloudwatch_logs"
 		]
 }
 
