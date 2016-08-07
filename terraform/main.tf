@@ -251,20 +251,7 @@ resource "aws_eip" "nat" {
 
 resource "aws_iam_role" "cloudwatch_logs" {
 		name = "cloudwatch_logs"
-		assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "ec2.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-EOF
+		assume_role_policy = "${file("files/templates/cloudwatch_logs_assume_role_policy.json")}"
 }
 
 resource "aws_iam_role_policy" "cloudwatch_logs" {
@@ -273,25 +260,7 @@ resource "aws_iam_role_policy" "cloudwatch_logs" {
 		depends_on = [
 				"aws_iam_role.cloudwatch_logs"
 		]
-		policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": [
-        "logs:CreateLogGroup",
-        "logs:CreateLogStream",
-        "logs:PutLogEvents",
-        "logs:DescribeLogStreams"
-      ],
-      "Effect": "Allow",
-      "Resource": [
-        "arn:aws:logs:*:*:*"
-      ]
-    }
-  ]
-}
-EOF
+		policy = "${file("files/templates/cloudwatch_logs_policy.json")}"
 }
 
 resource "aws_iam_instance_profile" "web_profile" {
