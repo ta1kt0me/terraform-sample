@@ -209,6 +209,9 @@ resource "aws_instance" "app_host" {
 resource "aws_eip" "nat" {
 		instance = "${aws_instance.nat_host.id}"
 		vpc = true
+		depends_on = [
+				"aws_instance.nat_host"
+		]
 }
 
 resource "aws_iam_role" "cloudwatch_logs" {
