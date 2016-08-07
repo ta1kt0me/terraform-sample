@@ -195,9 +195,11 @@ resource "aws_instance" "app_host" {
 				volume_type = "gp2"
 				volume_size = "8"
 		}
+		iam_instance_profile = "${aws_iam_instance_profile.app_profile.name}"
 		depends_on = [
 				"aws_subnet.private-a",
-				"aws_security_group.app"
+				"aws_security_group.app",
+				"aws_iam_instance_profile.app_profile"
 		]
 		tags {
 				Name = "${var.tag}"
@@ -207,6 +209,61 @@ resource "aws_instance" "app_host" {
 resource "aws_eip" "nat" {
 		instance = "${aws_instance.nat_host.id}"
 		vpc = true
+}
+
+resource "aws_iam_role" "cloudwatch_logs" {
+		name = "cloudwatch_logs"
+		assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "cloudwatch_logs" {
+		name = "cloudwatch_logs"
+		role = "${aws_iam_role.cloudwatch_logs.id}"
+		depends_on = [
+				"aws_iam_role.cloudwatch_logs"
+		]
+		policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:DescribeLogStreams"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:logs:*:*:*"
+      ]
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_instance_profile" "app_profile" {
+		name = "app_profile"
+		roles = [
+				"${aws_iam_role.cloudwatch_logs.name}"
+		]
+		depends_on = [
+				"aws_iam_role.cloudwatch_logs"
+		]
 }
 
 output "eip" {
