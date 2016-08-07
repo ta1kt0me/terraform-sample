@@ -1,0 +1,7 @@
+---
+- hosts: web
+  remote_user: ubuntu
+  tasks:
+    - shell: hostname
+    - apt: name=nginx update_cache=yes
+      become: true
